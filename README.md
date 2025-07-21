@@ -2,7 +2,7 @@
 
 _Still under development. Nothing export yet._
 
-[![coverage][coverage]][covg-url] [![Checked with Biome][biome-check]][biome]
+[![Checked with Biome][biome-check]][biome]
 
 ## About
 
@@ -33,8 +33,6 @@ Please visit [here][ts-textile] .
 <!-- Definition -->
 
 [file-license]: LICENSE
-[coverage]: https://img.shields.io/badge/coverage-83.81-yellowgreen?style=flat
-[covg-url]: https://phothinmg.github.io/textile-ts/lcoview/index.html
 [textilejs]: https://github.com/borgar/textile-js
 [textile-web]: https://textile-lang.com/
 [borgar]: https://github.com/borgar

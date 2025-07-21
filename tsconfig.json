@@ -9,6 +9,6 @@
     "target": "es2022",
     "outDir": "./dist"
   },
-  "include": ["src/**/*", "textile/highlightVisitor.ts"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
