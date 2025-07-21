@@ -1,0 +1,127 @@
+exports[`Block quotations > Block quotations using \`bq.\` 1`] = `
+{
+  "text": "bq. A block quotation.",
+  "html": "<blockquote>\\n<p>A block quotation.</p>\\n</blockquote>",
+  "result": "<blockquote>\\n<p>A block quotation.</p>\\n</blockquote>"
+}
+`;
+
+exports[`Headings > Heading with class , Id and styles 1`] = `
+{
+  "text": "h2(foo bar #biz){color:green}. Textile",
+  "html": "<h2 class=\\"foo bar\\" id=\\"biz\\" style=\\"color:green;\\">Textile</h2>",
+  "result": "<h2 class=\\"foo bar\\" id=\\"biz\\" style=\\"color:green;\\">Textile</h2>"
+}
+`;
+
+exports[`Headings > Heading with formatting modifiers 1`] = `
+{
+  "text": "h2<>. Textile",
+  "html": "<h2 style=\\"text-align:justify;\\">Textile</h2>",
+  "result": "<h2 style=\\"text-align:justify;\\">Textile</h2>"
+}
+`;
+
+exports[`Headings > Heading with styles 1`] = `
+{
+  "text": "h2{color:green}. This is a title",
+  "html": "<h2 style=\\"color:green;\\">This is a title</h2>",
+  "result": "<h2 style=\\"color:green;\\">This is a title</h2>"
+}
+`;
+
+exports[`Headings > Headings can be aligned center 1`] = `
+{
+  "text": "h3=. Centered header",
+  "html": "<h3 style=\\"text-align:center;\\">Centered header</h3>",
+  "result": "<h3 style=\\"text-align:center;\\">Centered header</h3>"
+}
+`;
+
+exports[`Headings > Headings can be aligned left 1`] = `
+{
+  "text": "h3<. Left aligned header",
+  "html": "<h3 style=\\"text-align:left;\\">Left aligned header</h3>",
+  "result": "<h3 style=\\"text-align:left;\\">Left aligned header</h3>"
+}
+`;
+
+exports[`Headings > Headings can be aligned right 1`] = `
+{
+  "text": "h3>. Right aligned header",
+  "html": "<h3 style=\\"text-align:right;\\">Right aligned header</h3>",
+  "result": "<h3 style=\\"text-align:right;\\">Right aligned header</h3>"
+}
+`;
+
+exports[`Headings > Plain Heading 1`] = `
+{
+  "text": "h2. Textile",
+  "html": "<h2>Textile</h2>",
+  "result": "<h2>Textile</h2>"
+}
+`;
+
+exports[`No formatting (override Textile) > Skip Textile processing for a block of content. 1`] = `
+{
+  "text": "notextile. Straight quotation marks are not converted into curly ones \\"in this example\\".",
+  "html": "Straight quotation marks are not converted into curly ones \\"in this example\\".",
+  "result": "Straight quotation marks are not converted into curly ones \\"in this example\\"."
+}
+`;
+
+exports[`Paragraphs > Identifying a paragraph with p. 1`] = `
+{
+  "text": "p. A paragraph.",
+  "html": "<p>A paragraph.</p>",
+  "result": "<p>A paragraph.</p>"
+}
+`;
+
+exports[`Paragraphs > Indentation can be specified by one or more parentheses for every 1em to the right or left 1`] = `
+{
+  "text": "p(((. Left indent 3em.",
+  "html": "<p style=\\"padding-left:3em;\\">Left indent 3em.</p>",
+  "result": "<p style=\\"padding-left:3em;\\">Left indent 3em.</p>"
+}
+`;
+
+exports[`Paragraphs > Indentation can be specified by one or more parentheses for every 1em to the right or left 2`] = `
+{
+  "text": "p)))>. right indent 3em",
+  "html": "<p style=\\"padding-right:3em;text-align:right;\\">right indent 3em</p>",
+  "result": "<p style=\\"padding-right:3em;text-align:right;\\">right indent 3em</p>"
+}
+`;
+
+exports[`Paragraphs > Plain Paragraph 1`] = `
+{
+  "text": "A paragraph.",
+  "html": "<p>A paragraph.</p>",
+  "result": "<p>A paragraph.</p>"
+}
+`;
+
+exports[`Pre-formatted text > Blocks with empty lines, pre.. is used: 1`] = `
+{
+  "text": "pre.. \\n                  The first pre-formatted line.\\n \\n                                  And another line.",
+  "html": "<pre>\\n                  The first pre-formatted line.\\n \\n                                  And another line.</pre>",
+  "result": "<pre>\\n                  The first pre-formatted line.\\n \\n                                  And another line.</pre>"
+}
+`;
+
+exports[`Pre-formatted text > Displayed in a pre block. Spaces and line breaks are preserved 1`] = `
+{
+  "text": "pre. Pre-formatted       text",
+  "html": "<pre>Pre-formatted       text</pre>",
+  "result": "<pre>Pre-formatted       text</pre>"
+}
+`;
+
+exports[`Textile comments > Use three '#' signs and a full stop to start comment block 1`] = `
+{
+  "text": "###. This is a textile comment block.",
+  "html": "",
+  "result": ""
+}
+`;

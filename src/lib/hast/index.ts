@@ -1,12 +1,14 @@
-import { escapeHTML } from "../shares/helpers.js";
 import type {
-  ElementNode,
-  JsonMLNode,
-  JsonMLNodes,
   RootNode,
-  TagName,
+  JsonMLNodes,
+  JsonMLNode,
   TextileNode,
-} from "../shares/types.js";
+  ElementNode,
+  TagName,
+} from "../types.js";
+import { escapeHTML, VOID_TAGS } from "../helpers.js";
+
+// ============================================================================================ //
 export interface TextileVisitor {
   visitElement?: (
     node: ElementNode,
@@ -14,26 +16,15 @@ export interface TextileVisitor {
     parent?: TextileNode | TextileNode[]
   ) => void;
 }
-
-const VOID_TAGS = new Set([
-  "area",
-  "base",
-  "br",
-  "col",
-  "embed",
-  "hr",
-  "img",
-  "input",
-  "link",
-  "meta",
-  "param",
-  "source",
-  "track",
-  "wbr",
-]);
 const isAttr = (input: any) =>
   typeof input === "object" && !Array.isArray(input) && input !== null;
 
+/**
+ * ml2hast takes a JSON-ML tree and converts it to a hast-compatible tree.
+ *
+ * @param tree - the JSON-ML tree to be converted
+ * @returns a hast-compatible tree
+ */
 export const ml2hast = (tree: JsonMLNodes) => {
   const root: RootNode = {
     type: "Root",
@@ -85,7 +76,20 @@ export const ml2hast = (tree: JsonMLNodes) => {
   root.children = tree.flatMap(traverse);
   return root;
 };
-
+/**
+ * hast2html takes a hast-compatible tree and converts it to an HTML string.
+ *
+ * @param root - the hast-compatible tree to be converted
+ * @returns an HTML string
+ *
+ * This function traverses the hast-compatible tree and constructs an HTML
+ * string by mapping each node to its HTML representation. It handles both
+ * Element and Text nodes. If a node is an Element node, it constructs the
+ * HTML representation by mapping its children to their HTML representation
+ * and wrapping it with the tag. If the node is a Text node, it escapes the
+ * text content and returns it as the HTML representation. It uses the
+ * VOID_TAGS set to check if a tag should be self-closing or not.
+ */
 export function hast2html(root: RootNode) {
   const traverse = (node: TextileNode): string => {
     if (node.type === "Text") {
@@ -118,6 +122,14 @@ export function hast2html(root: RootNode) {
   return root.children.map(traverse).join("");
 }
 
+/**
+ * Visits all Element nodes in a hast-compatible tree and calls the
+ * visitElement method of the given visitor for each node. The
+ * traverse function is used to recursively traverse the tree.
+ *
+ * @param tree - the hast-compatible tree to be traversed
+ * @param visitor - the visitor object with the visitElement method
+ */
 export function visit(tree: RootNode, visitor: TextileVisitor) {
   const traverse = (
     node: TextileNode,

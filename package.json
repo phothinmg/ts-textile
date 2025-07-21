@@ -5,7 +5,8 @@
     "build": "tshy",
     "check": "biome check src --write",
     "format": "biome format src --write",
-    "test": "tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=tests/lcov.info --test-update-snapshots"
+    "test": "tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=tests/lcov.info --test-update-snapshots",
+    "tst": "tsx --test --test-update-snapshots"
   },
   "keywords": [
     "textile"

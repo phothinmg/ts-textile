@@ -13,7 +13,7 @@
  * ```
  *
  */
-export const blockCode = (input: string) => {
+export const stateABlockCode = (input: string) => {
 	const lines = input.split(/\r?\n/);
 	const bcOpenRe = /^bc([^.]*)(\.\.)/;
 	const bcCloseRe = /^..bc$/; // $ for make sure the line has only `..bc`
@@ -83,7 +83,7 @@ export const blockCode = (input: string) => {
 		return arr.reduce(
 			(pre, cur) => ({
 				id: pre.id,
-				line: `${pre.line}\n${cur.line}`,
+				line: pre.line + cur.line,
 			}),
 			{ id: arr[0].id, line: "" },
 		);
@@ -99,8 +99,3 @@ export const blockCode = (input: string) => {
 		oriLines,
 	};
 };
-
-export const bc = (str: string): string =>
-	blockCode(str)
-		.newLines.filter((i) => i !== "..bc" && i !== "%bc%")
-		.join("\n");
