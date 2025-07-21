@@ -1,0 +1,41 @@
+node_modules
+# --------------- Dev -----
+src 
+tsconfig.json 
+biome.json
+package.lock.json 
+## test dir
+tests 
+## workflows
+.github
+## editor
+.vscode
+## assets
+textile-logo.svg
+# --------------- Local tests -------------------
+## Js
+a.js
+b.cjs
+## TS
+aa.ts 
+bb.ts
+b.ts
+a.ts
+## textile
+a.textile
+b.textile
+## json
+aa.json
+bb.json
+## html
+aa.html
+bb.html
+# ---------------------- Build dirs ------------------
+docs
+.tshy
+documents
+# ----------------------- Local Notes ---------------
+textile
+note.md
+tests
+

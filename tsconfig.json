@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
+    "sourceMap": true,
+    "target": "es2022",
+    "outDir": "./dist"
+  },
+  "include": ["src/**/*", "textile/highlightVisitor.ts"],
+  "exclude": ["node_modules", "dist"]
+}
