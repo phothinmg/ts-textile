@@ -5,12 +5,7 @@
     "build": "tshy",
     "check": "biome check src --write",
     "format": "biome format src --write",
-    "test:report": "tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=tests/lcov.info --test-update-snapshots",
-    "coverage:build": "lcov-viewer lcov -o ./docs/lcoview ./tests/lcov.info",
-    "docs:build": "typedoc && npm run coverage:build",
-    "deploy": "npm run docs:build && gh-pages -d docs",
-    "badge": "tsx tests/lcov.ts",
-    "test": "tsx --test --test-update-snapshots"
+    "test": "tsx --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=tests/lcov.info --test-update-snapshots"
   },
   "keywords": [
     "textile"
@@ -23,12 +18,8 @@
     "@biomejs/biome": "^2.1.1",
     "@lcov-viewer/cli": "^1.3.0",
     "@types/node": "^24.0.10",
-    "gh-pages": "^6.3.0",
-    "lcov-utils": "^0.5.4",
     "tshy": "^3.0.2",
     "tsx": "^4.20.3",
-    "typedoc": "^0.28.7",
-    "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "^5.8.3"
   },
   "files": [
