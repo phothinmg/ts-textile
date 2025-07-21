@@ -178,7 +178,7 @@ export const regexp = {
 	) as RegExp,
 	//list
 	reList: compile(
-		/^((?:[:txlisthd:][^\0\n]*(?:\r?\n|$))+)(\s*\n|$)/,
+		/^((?:[:txlisthd:][^\r\n\0]*\r?\n|[:txlisthd:][^\r\n\0]*$)+)(\s*\n|$)/,
 		"s",
 	) as RegExp,
 	reItem: compile(/^([#*]+)([^\0]+?)(\n(?=[:txlisthd2:])|$)/, "s") as RegExp,
