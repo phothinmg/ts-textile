@@ -1,5 +1,5 @@
+import type { TagName } from "../../../types.js";
 import { regexp } from "./re.js";
-import type { TagName } from "../../types.js";
 
 const ReTests = {
   testBlock(name: TagName) {

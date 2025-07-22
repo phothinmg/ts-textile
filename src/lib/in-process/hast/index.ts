@@ -1,12 +1,12 @@
+import { escapeHTML, VOID_TAGS } from "../../helpers.js";
 import type {
-  RootNode,
-  JsonMLNodes,
-  JsonMLNode,
-  TextileNode,
   ElementNode,
+  JsonMLNode,
+  JsonMLNodes,
+  RootNode,
   TagName,
-} from "../types.js";
-import { escapeHTML, VOID_TAGS } from "../helpers.js";
+  TextileNode,
+} from "../../types.js";
 
 // ============================================================================================ //
 export interface TextileVisitor {
