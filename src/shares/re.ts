@@ -5,7 +5,7 @@ const ucaps =
 	"A-Z" +
 	// Latin extended À-Þ
 	"\u00c0-\u00d6\u00d8-\u00de" +
-	// Latin caps with embelishments and ligatures...
+	// Latin caps with embellishments and ligatures...
 	"\u0100\u0102\u0104\u0106\u0108\u010a\u010c\u010e\u0110\u0112\u0114\u0116\u0118\u011a\u011c\u011e\u0120\u0122\u0124\u0126\u0128\u012a\u012c\u012e\u0130\u0132\u0134\u0136\u0139\u013b\u013d\u013f" +
 	"\u0141\u0143\u0145\u0147\u014a\u014c\u014e\u0150\u0152\u0154\u0156\u0158\u015a\u015c\u015e\u0160\u0162\u0164\u0166\u0168\u016a\u016c\u016e\u0170\u0172\u0174\u0176\u0178\u0179\u017b\u017d" +
 	"\u0181\u0182\u0184\u0186\u0187\u0189-\u018b\u018e-\u0191\u0193\u0194\u0196-\u0198\u019c\u019d\u019f\u01a0\u01a2\u01a4\u01a6\u01a7\u01a9\u01ac\u01ae\u01af\u01b1-\u01b3\u01b5\u01b7\u01b8\u01bc" +
@@ -100,7 +100,7 @@ export function compile(src: string | RegExp, ...args: any[]) {
 	if (flags && /x/.test(flags)) {
 		rx = collapse(rx);
 	}
-	// allow dot all expressions
+	// allow dotall expressions
 	if (flags && /s/.test(flags)) {
 		rx = rx.replace(/([^\\])\./g, "$1[^\\0]");
 	}
@@ -179,7 +179,7 @@ export const regexp = {
 	) as RegExp,
 	//list
 	reList: compile(
-		/^((?:[:txlisthd:][^\0]*?(?:\r?\n|$))+)(\s*\n|$)/,
+		/^((?:[:txlisthd:][^\r\n\0]*\r?\n|[:txlisthd:][^\r\n\0]*$)+)(\s*\n|$)/,
 		"s",
 	) as RegExp,
 	reItem: compile(/^([#*]+)([^\0]+?)(\n(?=[:txlisthd2:])|$)/, "s") as RegExp,

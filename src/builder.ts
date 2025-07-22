@@ -1,4 +1,4 @@
-import type { JsonMLNode, JsonMLNodes } from "../../types.js";
+import type { JsonMLNode, JsonMLNodes, JsonMLRoot } from "./shares/types.js";
 
 class Ribbon {
 	private org: string;
@@ -57,7 +57,7 @@ class Ribbon {
 
 class Builder {
 	private ar: any[];
-	private arr: JsonMLNodes;
+	private arr: JsonMLRoot;
 	constructor(initArr?: any) {
 		this.ar = initArr && Array.isArray(initArr) ? initArr : [];
 		this.arr = [...this.ar];

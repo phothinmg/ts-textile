@@ -1,63 +1,25 @@
 // cSpell:disable
-
-import { merge, reIndent } from "../../helpers.js";
+import { Builder, Ribbon } from "../builder.js";
+import Constants, { type CharToTag } from "../shares/constants.js";
+import { merge, reIndent } from "../shares/helpers.js";
+import { compile, escape_sc, regexp } from "../shares/re.js";
+import ReTests from "../shares/retest.js";
 import type {
+	_Options,
 	CloseToken,
+	JsonMLAttributes,
 	JsonMLElement,
 	JsonMLNode,
-	JsonMLRoot,
+	JsonMLNodes,
 	OpenToken,
 	Options,
 	SingleToken,
 	TagName,
 	Token,
-} from "../../types.js";
-import { Builder, Ribbon } from "./builder.js";
-import { compile, escape_sc, regexp } from "./regexp/re.js";
-import ReTests from "./regexp/retest.js";
+} from "../shares/types.js";
+import { createFootnoteHashId, createFootnoteId } from "./helpers.js";
+// ========================================================================================================//
 
-// ===========================================================================================================//
-const phraseConvert = {
-	"*": "strong",
-	"**": "b",
-	"??": "cite",
-	_: "em",
-	__: "i",
-	"-": "del",
-	"%": "span",
-	"+": "ins",
-	"~": "sub",
-	"^": "sup",
-	"@": "code",
-};
-const singletons = {
-	area: 1,
-	base: 1,
-	br: 1,
-	col: 1,
-	embed: 1,
-	hr: 1,
-	img: 1,
-	input: 1,
-	link: 1,
-	meta: 1,
-	option: 1,
-	param: 1,
-	wbr: 1,
-};
-const pbaAlignLookup = {
-	"<": "left",
-	"=": "center",
-	">": "right",
-	"<>": "justify",
-};
-const pbaVAlignLookup = { "~": "bottom", "^": "top", "-": "middle" };
-const charToTag = {
-	_: "thead",
-	"~": "tfoot",
-	"-": "tbody",
-};
-type CharToTag = keyof typeof charToTag;
 /**
  * Copy attributes from an object to a new object, skipping any properties
  * present in `blacklist`.
@@ -84,6 +46,7 @@ export function copyAttr(
 	}
 	return d;
 }
+
 /**
  * Parse a string of attributes for a given element. Returns an object with the
  * parsed attributes.
@@ -101,7 +64,7 @@ export function parseAttr(input: string, element: TagName, endToken?: string) {
 	}
 	let m: RegExpExecArray | null = null;
 	const st = <Record<string, string>>{};
-	const o = <Record<string, any>>{};
+	const o = <JsonMLAttributes>{};
 	let remaining = input;
 	//
 	const isBlock = ReTests.testBlock(element);
@@ -175,7 +138,10 @@ export function parseAttr(input: string, element: TagName, endToken?: string) {
 		// only for blocks:
 		if (isImg || isBlock || isList) {
 			if ((m = reAlign.exec(remaining))) {
-				const align = pbaAlignLookup[m[1] as keyof typeof pbaAlignLookup];
+				const align =
+					Constants.pbaAlignLookup[
+						m[1] as keyof typeof Constants.pbaAlignLookup
+					];
 				if (isImg) {
 					o.align = align;
 				} else {
@@ -189,7 +155,9 @@ export function parseAttr(input: string, element: TagName, endToken?: string) {
 		if (element === "td" || element === "tr") {
 			if ((m = regexp.reVAlign.exec(remaining))) {
 				st["vertical-align"] =
-					pbaVAlignLookup[m[1] as keyof typeof pbaVAlignLookup];
+					Constants.pbaVAlignLookup[
+						m[1] as keyof typeof Constants.pbaVAlignLookup
+					];
 				remaining = remaining.slice(m[0].length);
 				continue;
 			}
@@ -217,6 +185,7 @@ export function parseAttr(input: string, element: TagName, endToken?: string) {
 	}
 	return remaining === input ? undefined : [input.length - remaining.length, o];
 }
+
 /**
  * Parses a string node and replaces certain textual patterns with their corresponding
  * HTML entity representations. The function handles various glyph replacements such as
@@ -261,6 +230,7 @@ function parseGlyph(node: JsonMLNode) {
 			.replace(/[([]\+\/-[\])]/, "&#177;")
 	);
 }
+
 /**
  * Parses a string of HTML attributes and returns an object with the parsed
  * attributes. The string is expected to be in the format of a space-separated
@@ -271,7 +241,7 @@ function parseGlyph(node: JsonMLNode) {
  */
 export function parseHtmlAttr(attrSrc: string) {
 	// parse ATTR and add to element
-	const attr = <Record<string, any>>{};
+	const attr = <JsonMLAttributes>{};
 	let m: RegExpExecArray | null = null;
 	while ((m = regexp.reAttr.exec(attrSrc))) {
 		attr[(m as RegExpExecArray)[1] as string] =
@@ -280,6 +250,7 @@ export function parseHtmlAttr(attrSrc: string) {
 	}
 	return attr;
 }
+
 /**
  * Tokenizes a string of HTML into an array of tokens. The tokens will be either
  * "COMMENT", "CLOSE", "OPEN", "SINGLE", or "TEXT" types. The `whitelistTags` option
@@ -354,7 +325,7 @@ export function tokenize(
 		else if ((m = ReTests.testOpenTag(src)) && oktag(m[1] as TagName)) {
 			const token: OpenToken | SingleToken = {
 				type:
-					m[3] || ((m as RegExpExecArray)[1] as string) in singletons
+					m[3] || ((m as RegExpExecArray)[1] as string) in Constants.singletons
 						? "SINGLE"
 						: "OPEN",
 				tag: m[1] as TagName,
@@ -395,6 +366,7 @@ export function tokenize(
 	} while (ribbon.valueOf());
 	return tokens;
 }
+
 /**
  * Parses a sequence of tokens into a JSON-ML structure representing HTML elements.
  *
@@ -450,7 +422,7 @@ export function parseHtml(tokens: Token[], lazy?: any) {
 	root.sourceLength = token ? token.pos + token.src.length : 0;
 	return root;
 }
-// -----------------------------------------------------------------------------------------------//
+
 /**
  * Parses a given string of source text into a sequence of inline JSON-ML nodes,
  * handling various textile markup and HTML elements.
@@ -467,7 +439,8 @@ export function parseHtml(tokens: Token[], lazy?: any) {
  * It utilizes regular expressions to match specific patterns and constructs
  * corresponding JSON-ML nodes, which are collected and returned as the result.
  */
-export function parseInline(src: string, options?: Options): JsonMLRoot {
+
+export function parseInline(src: string, options?: Options) {
 	const ribbon = new Ribbon(src);
 	const list = new Builder();
 	let m: RegExpExecArray | null = null;
@@ -509,7 +482,8 @@ export function parseInline(src: string, options?: Options): JsonMLRoot {
 			src = ribbon.toString();
 			const tok = m[2];
 			const fence = m[1];
-			const phraseType = phraseConvert[tok as keyof typeof phraseConvert];
+			const phraseType =
+				Constants.phraseConvert[tok as keyof typeof Constants.phraseConvert];
 			const code = phraseType === "code";
 			if ((pba = !code && parseAttr(src, phraseType as TagName, tok))) {
 				ribbon.advance(pba[0]);
@@ -587,7 +561,7 @@ export function parseInline(src: string, options?: Options): JsonMLRoot {
 			src = ribbon.toString();
 			const tag = m[1] as TagName;
 			const single =
-				m[3] || ((m as RegExpExecArray)[1] as string) in singletons;
+				m[3] || ((m as RegExpExecArray)[1] as string) in Constants.singletons;
 			let element = [tag];
 			if (m[2]) {
 				element.push(parseHtmlAttr(m[2]) as any);
@@ -628,10 +602,11 @@ export function parseInline(src: string, options?: Options): JsonMLRoot {
 			src = ribbon.toString();
 			list.add([
 				"sup",
-				{ class: "footnote", id: `fnr${m[1]}` },
+				// `fnr${m[1]}`
+				{ class: "footnote", id: createFootnoteId(m[1], true) },
 				m[2] === "!"
-					? m[1] // "!" suppresses the link
-					: ["a", { href: `#fn${m[1]}` }, m[1]],
+					? m[1] // "!" suppresses the link `#fn${m[1]}`
+					: ["a", { href: createFootnoteHashId(m[1], false) }, m[1]],
 			] as any);
 			continue;
 		}
@@ -641,7 +616,7 @@ export function parseInline(src: string, options?: Options): JsonMLRoot {
 			src = ribbon.toString();
 			let caps = [
 				"span" as TagName,
-				{ class: "caps" } as Record<string, any>,
+				{ class: "caps" } as JsonMLAttributes,
 				m[1] as string,
 			];
 			if (m[2]) {
@@ -702,6 +677,183 @@ export function parseInline(src: string, options?: Options): JsonMLRoot {
 	} while (ribbon.valueOf());
 	return list.get().map(parseGlyph);
 }
+
+/**
+ * Generate a string of indentation for a list item of depth `n`.
+ *
+ * @param {number} n - The depth of the list item.
+ *
+ * @returns {string} A string of indentation, with a newline character at the
+ * beginning followed by `n` tab characters.
+ */
+function listPad(n: number): string {
+	let s = "\n";
+	while (n--) {
+		s += "\t";
+	}
+	return s;
+}
+
+/**
+ * Parses a given string of source text into a sequence of list items,
+ * handling various textile markup and HTML elements.
+ *
+ * @param src - The source string to be parsed, containing list items.
+ * @param options - Optional parsing options that may influence processing,
+ *                  such as enabling line breaks.
+ *
+ * @returns An array of JSON-ML nodes representing the parsed list items.
+ *
+ * The function iterates over the source text, identifying and processing
+ * different elements such as list starts and continuations, list control,
+ * and list items. It utilizes regular expressions to match specific patterns
+ * and constructs corresponding JSON-ML nodes, which are collected and
+ * returned as the result.
+ */
+export function parseList(src: string, options?: _Options) {
+	const ribbon = new Ribbon(src.replace(/(^|\r?\n)[\t ]+/, "$1"));
+	const stack: any[] = [];
+	const currIndex: { [x: number]: any } = {};
+	const lastIndex = options?._lst || {};
+	let itemIndex = 0;
+	let listAttr: any = null;
+	let m: RegExpExecArray | null = null;
+	let n: RegExpExecArray | null = null;
+	let s: any = { ul: [] }; // Initialize s with a default structure
+	while ((m = regexp.reItem.exec(src))) {
+		const item = ["li"];
+		const destLevel = (m?.[1] as string).length;
+		const type = (m?.[1] as string).slice(-1) === "#" ? "ol" : "ul";
+		let newLi: null | string[] = null;
+		let lst: any;
+		let par: any;
+		let pba: any;
+		let r: any;
+		// list starts and continuations
+		if ((n = /^(_|\d+)/.exec(m?.[2] as string))) {
+			itemIndex = Number.isFinite(parseInt(n?.[1] as string))
+				? parseInt(n?.[1] as string, 10)
+				: lastIndex[destLevel] || currIndex[destLevel] || 1;
+			m[2] = (m?.[2] as string).slice((n?.[1] as string).length);
+		}
+
+		if ((pba = parseAttr(m?.[2] as string, "li"))) {
+			m[2] = (m?.[2] as string).slice(pba[0] as any);
+			pba = pba[1];
+		}
+
+		// list control
+		if (/^\.\s*$/.test(m?.[2] as string)) {
+			listAttr = pba || {};
+			ribbon.advance(m[0]);
+			src = ribbon.toString();
+			continue;
+		}
+		// create nesting until we have correct level
+		while (stack.length < destLevel) {
+			// list always has an attribute object, this simplifies first-pba resolution
+			lst = [type, {}, listPad(stack.length + 1), (newLi = ["li"])];
+			par = stack[stack.length - 1];
+			if (par) {
+				par.li.push(listPad(stack.length));
+				par.li.push(lst);
+			}
+			stack.push({
+				ul: lst,
+				li: newLi,
+				// count attributes's found per list
+				att: 0,
+			});
+			currIndex[stack.length] = 1;
+		}
+		// remove nesting until we have correct level
+		while (stack.length > destLevel) {
+			r = stack.pop();
+			r.ul.push(listPad(stack.length));
+			// lists have a predictable structure - move pba from listitem to list
+			if (r.att === 1 && !r.ul[3][1].substr) {
+				merge(r.ul[1], r.ul[3].splice(1, 1)[0]);
+			}
+		}
+		// parent list
+		par = stack[stack.length - 1];
+
+		if (itemIndex) {
+			par.ul[1].start = itemIndex;
+			currIndex[destLevel] = itemIndex;
+			// falsy prevents this from fireing until it is set again
+			itemIndex = 0;
+		}
+		if (listAttr) {
+			// "more than 1" prevent attribute transfers on list close
+			par.att = 9;
+			merge(par.ul[1], listAttr as any);
+			listAttr = null;
+		}
+
+		if (!newLi) {
+			par.ul.push(listPad(stack.length), item);
+			par.li = item;
+		}
+		if (pba) {
+			par.li.push(pba);
+			par.att++;
+		}
+		Array.prototype.push.apply(
+			par.li,
+			parseInline((m?.[2] as string).trim(), options),
+		);
+
+		ribbon.advance(m[0]);
+		src = ribbon.toString();
+		currIndex[destLevel] = (currIndex[destLevel] || 0) + 1;
+	}
+	// ===
+	// remember indexes for continuations next time
+	if (options?._lst) {
+		options._lst = currIndex;
+	}
+
+	while (stack.length) {
+		s = stack.pop();
+		s.ul.push(listPad(stack.length));
+		// lists have a predictable structure - move pba from listitem to list
+		if (s.att === 1 && !s.ul[3][1].substr) {
+			merge(s.ul[1], s.ul[3].splice(1, 1)[0]);
+		}
+	}
+
+	return s.ul;
+}
+
+/**
+ * Replace any hrefs in links with the corresponding values from the dict.
+ * @param ml a JsonML tree
+ * @param dict a dictionary of hrefs to replace with
+ * @returns the modified JsonML tree
+ */
+export function fixLinks(ml: JsonMLNodes, dict: { [x: string]: any }) {
+	if (Array.isArray(ml)) {
+		if (ml[0] === "a") {
+			// found a link
+			const attr = ml[1];
+			if (
+				typeof attr === "object" &&
+				"href" in attr &&
+				(attr.href as string) in dict
+			) {
+				attr.href = dict[attr.href as string];
+			}
+		}
+		for (let i = 0, l = ml.length; i < l; i++) {
+			if (Array.isArray(ml[i])) {
+				fixLinks(ml[i] as JsonMLNodes, dict);
+			}
+		}
+	}
+	return ml;
+}
+
 /**
  * Parse a string of colon-delimited colgroup attributes, returning a colgroup JSON-ML node.
  *
@@ -738,11 +890,11 @@ export function parseColgroup(src: string) {
 	return colgroup.concat(["\n\t"]);
 }
 // Types for table structure
-type TableRow = ["tr", Record<string, any>?, ...any[]];
-type RowGroup = ["tbody" | "thead" | "tfoot", Record<string, any>?, ...any[]];
-type Caption = ["caption", Record<string, any>?, string?];
+type TableRow = ["tr", JsonMLAttributes?, ...any[]];
+type RowGroup = ["tbody" | "thead" | "tfoot", JsonMLAttributes?, ...any[]];
+type Caption = ["caption", JsonMLAttributes?, string?];
 type ColGroup = any; // Could be refined if parseColgroup is typed
-type Table = ["table", Record<string, any>, ...any[]];
+type Table = ["table", JsonMLAttributes, ...any[]];
 
 /**
  * Parse a given string of source text into a sequence of table rows,
@@ -764,7 +916,7 @@ export function parseTable(src: string, options?: any): Table {
 	const rowgroups: RowGroup[] = [];
 	let colgroup: ColGroup | undefined;
 	let caption: Caption | null = null;
-	const tAttr: Record<string, any> = {};
+	const tAttr: JsonMLAttributes = {};
 	let tCurr: RowGroup | undefined;
 	let row: TableRow;
 	let inner: Ribbon;
@@ -823,8 +975,10 @@ export function parseTable(src: string, options?: any): Table {
 		// "rowgroup" (tbody, thead, tfoot)
 		else if ((m = regexp.reRowgroup.exec(_src.valueOf()))) {
 			const tag =
-				(charToTag[m[1] as CharToTag] as "tbody" | "thead" | "tfoot") ||
-				"tbody";
+				(Constants.charToTag[m[1] as CharToTag] as
+					| "tbody"
+					| "thead"
+					| "tfoot") || "tbody";
 			pba = parseAttr(`${m[2]} `, tag);
 			setRowGroup(tag, pba?.[1]);
 			extended++;

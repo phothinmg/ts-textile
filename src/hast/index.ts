@@ -1,4 +1,4 @@
-import { escapeHTML, VOID_TAGS } from "../../helpers.js";
+import { escapeHTML } from "../shares/helpers.js";
 import type {
   ElementNode,
   JsonMLNode,
@@ -6,9 +6,7 @@ import type {
   RootNode,
   TagName,
   TextileNode,
-} from "../../types.js";
-
-// ============================================================================================ //
+} from "../shares/types.js";
 export interface TextileVisitor {
   visitElement?: (
     node: ElementNode,
@@ -16,6 +14,23 @@ export interface TextileVisitor {
     parent?: TextileNode | TextileNode[]
   ) => void;
 }
+
+const VOID_TAGS = new Set([
+  "area",
+  "base",
+  "br",
+  "col",
+  "embed",
+  "hr",
+  "img",
+  "input",
+  "link",
+  "meta",
+  "param",
+  "source",
+  "track",
+  "wbr",
+]);
 const isAttr = (input: any) =>
   typeof input === "object" && !Array.isArray(input) && input !== null;
 
@@ -76,6 +91,7 @@ export const ml2hast = (tree: JsonMLNodes) => {
   root.children = tree.flatMap(traverse);
   return root;
 };
+
 /**
  * hast2html takes a hast-compatible tree and converts it to an HTML string.
  *
@@ -99,7 +115,7 @@ export function hast2html(root: RootNode) {
     if (node.type === "Element") {
       const tag = node.tagName;
       const attributes = node.properties;
-      const attr = Object.entries(attributes)
+      const attr = Object.entries(attributes as Record<string, any>)
         .map(([key, value]) =>
           value == null
             ? ` ${key}`
@@ -109,7 +125,10 @@ export function hast2html(root: RootNode) {
 
       const content = node.children?.map(traverse).join("") || "";
 
-      if (VOID_TAGS.has(tag) || (tag.indexOf(":") > -1 && !content)) {
+      if (
+        VOID_TAGS.has(tag as TagName) ||
+        ((tag as TagName).indexOf(":") > -1 && !content)
+      ) {
         return `<${tag}${attr} />`;
       } else {
         return `<${tag}${attr}>${content}</${tag}>`;
